@@ -105,7 +105,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);font-w
   </div>
   <div id="menu" class="ovl menu"><div class="mwrap">
     <div class="logo">BLOCKWORLD<span>3D</span></div><div class="splash" id="splash"></div>
-    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 156</div>
+    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 157</div>
     <div id="prof" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px"><label>Nick: <input id="mNick" type="text" maxlength="16" style="width:140px;font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></label><label>Skin: <select id="mSkin" style="font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></select></label></div>
     <button class="btn" id="bPlay">Graj</button>
     <div class="row2"><button class="btn sm" id="bSet">Ustawienia (N)</button><button class="btn sm" id="bNew">Nowy świat</button></div>
@@ -2270,7 +2270,7 @@ function findPlayer(q){q=(q||'').toLowerCase();if(!q)return null;const all=[];
  return all.find(e=>e.n.toLowerCase().startsWith(q))||all.find(e=>e.n.toLowerCase().includes(q))||null}
 function findPlayerAny(nm){nm=nm.toLowerCase();return peersAll.find(x=>!x.sameTab&&x.kind==='viewer'&&(sStr(x.presence?.n)||'').toLowerCase().startsWith(nm))}
 function cmd(t){const a=t.slice(1).split(/\s+/),c=a[0];const say=s=>addChat(s,'#ffd84a');if(!adminOK&&!isOwner){say('🔒 Komendy są tylko dla admina – wpisz hasło w Panelu admina (B).');return}
- if(c==='pomoc')say('/seed · /tp x y z · /tp nick · /tp nick1 nick2 ·/dzien · /noc · /kreatywny · /przetrwanie · /mob nazwa (pig cow sheep chicken zombie skeleton creeper spider) · /spawn · /reset');
+ if(c==='pomoc')say('/seed · /tp x y z · /tp nick · /tp nick1 nick2 ·/dzien · /noc · /kreatywny · /przetrwanie · /mob nazwa (pig cow sheep chicken zombie skeleton creeper spider) · /spawn · /reset (ten sam świat od nowa) · /reset nowa (losowa mapa)');
  else if(c==='seed')say('Ziarno: '+SEED);else if(c==='wioska'){let best=null,bd=1e9;const ci=Math.floor(p.x/VCELL),cj=Math.floor(p.z/VCELL);for(let i=ci-3;i<=ci+3;i++)for(let j=cj-3;j<=cj+3;j++){const v=villageOf(i,j);if(!v)continue;const dd=Math.hypot(v.x-p.x,v.z-p.z);if(dd>30&&dd<bd){bd=dd;best=v}}if(!best)say('Brak wioski w pobliżu');else{p.x=best.x+.5;p.y=best.y+14;p.z=best.z+.5;p.vx=p.vy=p.vz=0;say('Teleport do wioski ('+best.x+', '+best.z+')')}}else if(c==='dzien'){wtime=.05;rEmit('time',{s:SEED,t:wtime});say('Dzień')}else if(c==='noc'){wtime=.55;rEmit('time',{s:SEED,t:wtime});say('Noc')}
  else if(c==='kreatywny'||c==='przetrwanie'){set.mode=c==='kreatywny'?'creative':'survival';applySet();say('Tryb: '+c)}
  else if(c==='tp'){
@@ -2290,7 +2290,7 @@ function cmd(t){const a=t.slice(1).split(/\s+/),c=a[0];const say=s=>addChat(s,'#
  else if(c==='claude'&&(a[1]==='stop'||a[1]==='wylacz')){CL.on=false;CL.build=false;clSync();if(isHost()){const q=mobs.find(m=>m.type==='claude');if(q)removeMob(q)}say('🤖 Claude wyłączony (/claude start włącza)')}
  else if(c==='claude'&&(a[1]==='start'||a[1]==='respawn')){CL.on=true;clSync();const x=p.x+3,z=p.z,y=p.y+1;const q=mobs.find(m=>m.type==='claude');if(isHost()){if(q){q.x=x;q.z=z;q.y=y;q.go=null;q.plan=null}else spawnMob('claude',x,y,z);say('🤖 Claude pojawił się obok Ciebie')}else{rEmit('spawnmob',{s:SEED,dm:dim,type:'claude',x,y,z});say('🤖 Wysłano prośbę o respawn Claude (host świata go przywoła)')}}
  else if(c==='claude'){const q=mobs.find(x=>x.type==='claude');if(q){q.x=p.x+3;q.z=p.z;q.y=p.y+1;q.go=null;q.plan=null;say('🤖 Claude przyszedł do Ciebie')}else say('Claude jest u hosta świata (lub wyłączony w panelu admina)')}
- else if(c==='reset'){const old=SEED,ns=(Math.random()*1e9)|0;resetWorld(ns);rEmit('reset',{old,seed:ns});say('Nowa losowa mapa!')}
+ else if(c==='reset'){const old=SEED,nw=a[1]&&/nowa|losow|new/i.test(a[1]),ns=nw?(Math.random()*1e9)|0:SEED;resetWorld(ns);p.x=spawn.x;p.z=spawn.z;p.y=CH;placed=false;rEmit('reset',{old,seed:ns});say(nw?'Nowa losowa mapa!':'Ten sam świat wyczyszczony (zniszczenia i budowle usunięte)')}
  else say('Nieznana komenda. Wpisz /pomoc')}
 function resetWorld(seed){flowLvl.clear();fallingSet.clear();waterQ.length=0;sandQ.length=0;loadWorld((seed!=null?seed:SEED)|0,false)}
 
