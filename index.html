@@ -105,7 +105,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);font-w
   </div>
   <div id="menu" class="ovl menu"><div class="mwrap">
     <div class="logo">BLOCKWORLD<span>3D</span></div><div class="splash" id="splash"></div>
-    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 158</div>
+    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 159</div>
     <div id="prof" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px"><label>Nick: <input id="mNick" type="text" maxlength="16" style="width:140px;font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></label><label>Skin: <select id="mSkin" style="font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></select></label></div>
     <button class="btn" id="bPlay">Graj</button>
     <div class="row2"><button class="btn sm" id="bSet">Ustawienia (N)</button><button class="btn sm" id="bNew">Nowy świat</button></div>
@@ -1933,7 +1933,7 @@ function onPeers(ch){peersAll=ch.peers;const me=ch.peers.find(q=>q.sameTab);if(m
   if(r&&r.sk!==sk){scene.remove(r.g);remotes.delete(q.peer);r=null}
   if(!r){const md=model('player',sk);scene.add(md.g);r={...md,sk,x:pr.x,y:pr.y,z:pr.z,tx:pr.x,ty:pr.y,tz:pr.z,yaw:pr.yw||0,tyaw:pr.yw||0,tp:0,nick:'',walk:0};remotes.set(q.peer,r)}
   if(r.nick!==nick){if(r.lab)r.g.remove(r.lab);r.lab=nameLabel(nick);r.g.add(r.lab);r.nick=nick}if(r.gone&&Number.isFinite(+pr.x)){r.gone=false;r.dyT=0;r.deathPos=null;r.g.visible=true;r.x=+pr.x||0;r.y=+pr.y||0;r.z=+pr.z||0}
-  r.tx=+pr.x||0;r.ty=+pr.y||0;r.tz=+pr.z||0;r.tyaw=+pr.yw||0;r.tp=+pr.pt||0;r.tcr=pr.c?1:0;r.tburn=pr.b?1:0;r.tact=pr.ac?1:0;r.tarmor=Array.isArray(pr.ar)?pr.ar:null;if(r.a!==pr.a){r.a=pr.a;r.sw=0}try{setRemoteHeld(r,+pr.h||0)}catch(e){}}catch(e){window.__re=String(e&&e.message||e)}}
+  {const nx=+pr.x||0,ny=+pr.y||0,nz=+pr.z||0,nt=performance.now();if(r.lt!==undefined&&(nx!==r.tx||nz!==r.tz||ny!==r.ty)){const dtt=(nt-r.lt)/1000;if(dtt>.02&&dtt<.6){const cl=v=>Math.max(-12,Math.min(12,v));r.vx=cl((nx-r.tx)/dtt);r.vy=cl((ny-r.ty)/dtt);r.vz=cl((nz-r.tz)/dtt)}else if(dtt>=.6){r.vx=r.vy=r.vz=0}r.lt=nt}else if(r.lt===undefined)r.lt=nt;else if(nx===r.tx&&nz===r.tz&&ny===r.ty&&nt-r.lt>300){r.vx=r.vy=r.vz=0}r.tx=nx;r.ty=ny;r.tz=nz}r.tyaw=+pr.yw||0;r.tp=+pr.pt||0;r.tcr=pr.c?1:0;r.tburn=pr.b?1:0;r.tact=pr.ac?1:0;r.tarmor=Array.isArray(pr.ar)?pr.ar:null;if(r.a!==pr.a){r.a=pr.a;r.sw=0}try{setRemoteHeld(r,+pr.h||0)}catch(e){}}catch(e){window.__re=String(e&&e.message||e)}}
  for(const[k,r]of remotes)if(!seen.has(k)){scene.remove(r.g);remotes.delete(k)}
  for(const q of ch.joined)if(!q.sameTab&&amHelper(q.peer))setTimeout(()=>sendSync(q.peer),1500);
  if(ui==='admin')buildPlayers();
@@ -2386,7 +2386,7 @@ function updateEnts(dt){
     if(ph){rEmit('hit',{to:ph,dmg:Math.min(8,a.dmg),x:+(a.x-a.vx).toFixed(2),z:+(a.z-a.vz).toFixed(2),n:set.nick});burst(a.x,a.y,a.z,new THREE.Color(0xff4040),7,2,.5);a.life=0;break}}}
   a.m.position.set(a.x,a.y,a.z);if(!a.stuck)a.m.lookAt(a.x+a.vx,a.y+a.vy,a.z+a.vz)}
  for(let i=tnts.length-1;i>=0;i--){const t=tnts[i];t.f-=dt;if(!t.d){t.c-=dt;if(t.c<=0){t.d=true;const bx0=Math.floor(t.x),by0=Math.floor(t.y),bz0=Math.floor(t.z);for(const[ox,oy,oz] of [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]){const nx=bx0+ox,ny=by0+oy,nz=bz0+oz;if(getB(nx,ny,nz)===22){primeTNT(nx,ny,nz,3);rEmit('blk',{s:SEED,x:nx,y:ny,z:nz,v:0})}}}}const fl=Math.floor(t.f*6)%2===0;t.m.material.forEach(m=>m.emissive.setHex(fl?0x888888:0));t.m.scale.setScalar(t.f<.4?1+(.4-t.f)*.5:1);if(t.f<=0){scene.remove(t.m);tnts.splice(i,1);explode(t.x,t.y,t.z,4,true)}}
- for(const r of remotes.values()){const f=1-Math.exp(-18*dt),ox=r.x,oz=r.z;r.x+=(r.tx-r.x)*f;r.y+=(r.ty-r.y)*f;r.z+=(r.tz-r.z)*f;let d=r.tyaw-r.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));r.yaw+=d*f;
+ for(const r of remotes.values()){const f=1-Math.exp(-14*dt),ox=r.x,oz=r.z;{const ext=Math.min(.22,(performance.now()-(r.lt||0))/1000);r.x+=(r.tx+(r.vx||0)*ext-r.x)*f;r.y+=(r.ty+(r.vy||0)*ext*.5-r.y)*f;r.z+=(r.tz+(r.vz||0)*ext-r.z)*f}let d=r.tyaw-r.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));r.yaw+=d*f;
   if(r.dyT>0){r.dyT-=dt;const fo=clamp((1.2-r.dyT)/.35,0,1);r.g.rotation.z=fo*1.5;for(const mt of r.mats.values())mt.emissive.setHex(0x9a1010);r.g.position.set(r.x,r.y,r.z);r.g.rotation.y=r.yaw+Math.PI;
    if(r.dyT<=0){burst(r.x,r.y+.9,r.z,new THREE.Color(0x555555),22,2,1.3,1.7);burst(r.x,r.y+.9,r.z,new THREE.Color(0x9a9a9a),14,1.5,1.5,1.5);snd('break',r.x,r.y,r.z);r.g.rotation.z=0;for(const mt of r.mats.values())mt.emissive.setHex(0);r.g.visible=false;r.gone=true}continue}
   if(r.gone)continue;
