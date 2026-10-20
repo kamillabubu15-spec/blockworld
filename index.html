@@ -105,7 +105,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);font-w
   </div>
   <div id="menu" class="ovl menu"><div class="mwrap">
     <div class="logo">BLOCKWORLD<span>3D</span></div><div class="splash" id="splash"></div>
-    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 157</div>
+    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 158</div>
     <div id="prof" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px"><label>Nick: <input id="mNick" type="text" maxlength="16" style="width:140px;font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></label><label>Skin: <select id="mSkin" style="font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></select></label></div>
     <button class="btn" id="bPlay">Graj</button>
     <div class="row2"><button class="btn sm" id="bSet">Ustawienia (N)</button><button class="btn sm" id="bNew">Nowy świat</button></div>
@@ -2161,8 +2161,8 @@ let prevUI='menu';const locked=()=>document.pointerLockElement===cv;let noLock=f
 function setUI(s){prevUI=ui;ui=s;if(s==='menu'&&window.__syncProf)window.__syncProf();if(s!=='chest'&&chEl)chEl.style.display='none';if(s!=='trade'&&tradeEl)tradeEl.style.display='none';$('menu').hidden=s!=='menu';$('inv').hidden=s!=='inv';$('setp').hidden=s!=='set';$('admin').hidden=s!=='admin';$('pass').hidden=s!=='pass';$('dead').hidden=s!=='dead';$('chatIn').hidden=s!=='chat';
  if(s!=='play'){for(const k in keys)keys[k]=false;mineDown=useDown=false;if(locked())document.exitPointerLock()}$('bPlay').textContent=placed?'Wróć do gry':'Graj';renderMP()}
 function lock(){if(isTouch||noLock){setUI('play');return}setUI('play');try{const r=cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{noLock=true})}catch(e){noLock=true}}
-document.addEventListener('pointerlockchange',()=>{if(!locked()&&ui==='play'&&!noLock)setUI('menu')});
-document.addEventListener('pointerlockerror',()=>{noLock=true;setUI('play')});
+document.addEventListener('pointerlockchange',()=>{if(locked())lockErr=0;if(!locked()&&ui==='play'&&!noLock&&lockErr===0)setUI('menu')});
+let lockErr=0;document.addEventListener('pointerlockerror',()=>{lockErr++;if(lockErr>=5){noLock=true;setUI('play');return}setTimeout(()=>{if(ui==='play'&&!locked()&&!noLock){try{const r=cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}},1400)});
 $('bPlay').onclick=()=>{audioInit();if(!placed&&SEED!==SCHOOL_SEED){loadWorld(SCHOOL_SEED,false);$('seedIn').value=SEED}if(!room)initRoom().then(()=>{renderMP();rEmit('hello',{s:SEED})});lock()};$('bSet').onclick=openSet;$('bNew').onclick=()=>{loadWorld((Math.random()*1e9)|0,false,true);rEmit('hello',{s:SEED});lock()};
 $('bRespawn').onclick=respawn;
 function eggIcon(base,spot){const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d');const edgeC=dark(base,.5);
