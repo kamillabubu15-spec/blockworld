@@ -105,7 +105,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);font-w
   </div>
   <div id="menu" class="ovl menu"><div class="mwrap">
     <div class="logo">BLOCKWORLD<span>3D</span></div><div class="splash" id="splash"></div>
-    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 160</div>
+    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 161</div>
     <div id="prof" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px"><label>Nick: <input id="mNick" type="text" maxlength="16" style="width:140px;font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></label><label>Skin: <select id="mSkin" style="font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></select></label></div>
     <button class="btn" id="bPlay">Graj</button>
     <div class="row2"><button class="btn sm" id="bSet">Ustawienia (N)</button><button class="btn sm" id="bNew">Nowy świat</button></div>
@@ -1746,9 +1746,18 @@ function portalShoot(){const now=performance.now();if(now<portalNext)return;cons
  if(!creative()&&gs&&gs.id===547){gs.d=Math.max(0,gs.d-1);invChanged()}
  const o=placePortal(c,n);rEmit('portal',{s:SEED,dm:dim,c:c.map(v=>+v.toFixed(2)),n});
  for(let i=0;i<30;i++){const a=i/30*6.28,rx=Math.cos(a)*o.sx*.45,ry=Math.sin(a)*o.sy*.45;burst(c[0]+o.r[0]*rx+o.u[0]*ry,c[1]+o.r[1]*rx+o.u[1]*ry,c[2]+o.r[2]*rx+o.u[2]*ry,o.col,1,2.2,.7,.7)}}
+const exitP=[];
+function spawnExit(c,n,net){const o=mkPortal(c,n,0);o.ex=1;exitP.push(o);snd('pz',c[0],c[1],c[2]);if(net)rEmit('pexit',{s:SEED,dm:dim,c:c.map(v=>+v.toFixed(2)),n:n.map(v=>+v.toFixed(3))})}
+function stepExit(dt){const T=performance.now()/1000;for(let i=exitP.length-1;i>=0;i--){const o=exitP[i];o.t+=dt;o.uT.value=T;let e,kk=0;
+ if(o.t<.3){const k=o.t/.3;e=1-Math.pow(1-k,3)*Math.cos(k*5)*.6*(1-k)}else if(o.t<3)e=1;
+ else{kk=Math.min(1,(o.t-3)/.8);e=Math.pow(1-kk,2.2);o.inner.rotation.z+=dt*(3+kk*40);if(!o.cl){o.cl=1;snd('pc',o.c[0],o.c[1],o.c[2])}}
+ o.uK.value=kk;o.grp.scale.set(o.sx*Math.max(e,.001),o.sy*Math.max(e,.001),1);o.grp.visible=o.dm===dim;
+ if(o.t>=3.8){for(let j=0;j<25;j++)burst(o.c[0],o.c[1],o.c[2],o.col,1,4,.7,.7);dropPortal(o);exitP.splice(i,1);continue}
+ o.pt-=dt;if(o.pt<=0&&o.dm===dim&&kk===0){o.pt=.08;const a=Math.random()*6.28,rx=Math.cos(a)*o.sx*.5,ry=Math.sin(a)*o.sy*.5;burst(o.c[0]+o.r[0]*rx+o.u[0]*ry,o.c[1]+o.r[1]*rx+o.u[1]*ry,o.c[2]+o.r[2]*rx+o.u[2]*ry,o.col,1,.8,.6,.5)}}}
 function stepPortals(dt){
+ if(exitP.length)stepExit(dt);
  if(pendTP){p.vx=p.vy=p.vz=0;peak=null;pendTP.w+=dt;const tx=Math.floor(pendTP.x),tz=Math.floor(pendTP.z);p.x=pendTP.x;p.z=pendTP.z;p.y=CH-4;let ok=false;try{ok=loaded(tx,tz)&&topY(tx,tz)>0}catch(e){}
-  if(ok||pendTP.w>8){const ty=Math.max(topY(tx,tz),20);p.y=ty+1.2;p.vy=0;peak=null;burst(p.x,p.y+1,p.z,new THREE.Color(0x4dff3a),30,4,.9,.9);pendTP=null;toast('🌀 Dotarłeś w losowe miejsce!')}return}
+  if(ok||pendTP.w>8){const ty=Math.max(topY(tx,tz),20);p.y=ty+1.2;p.vy=0;peak=null;burst(p.x,p.y+1,p.z,new THREE.Color(0x4dff3a),30,4,.9,.9);pendTP=null;{const fx=-Math.sin(yaw),fz=-Math.cos(yaw);spawnExit([p.x-fx*1.3,p.y+1.5,p.z-fz*1.3],[fx,0,fz],true);p.vx=fx*3;p.vz=fz*3}toast('🌀 Dotarłeś w losowe miejsce!')}return}
  if(!portals.length)return;gpCD-=dt;const T=performance.now()/1000;
  for(let i=portals.length-1;i>=0;i--){const o=portals[i];o.t+=dt;o.uT.value=T;let e,kk=0;
   if(o.t<.3){const k=o.t/.3;e=1-Math.pow(1-k,3)*Math.cos(k*5)*.6*(1-k)}
@@ -1760,7 +1769,6 @@ function stepPortals(dt){
   o.pt-=dt;if(o.pt<=0&&o.dm===dim&&kk===0){o.pt=.07;const a=Math.random()*6.28,rx=Math.cos(a)*o.sx*.5,ry=Math.sin(a)*o.sy*.5;burst(o.c[0]+o.r[0]*rx+o.u[0]*ry,o.c[1]+o.r[1]*rx+o.u[1]*ry,o.c[2]+o.r[2]*rx+o.u[2]*ry,o.col,1,.8,.6,.5)}}
  if(gpCD>0||dead||ui!=='play')return;
  const I=portals[0];if(!I||I.t<.4||I.t>10||I.dm!==dim)return;
- {const dx=I.c[0]-p.x,dy=I.c[1]-(p.y+.9),dz=I.c[2]-p.z,dd=Math.hypot(dx,dy,dz),sf=-(dx*I.n[0]+dy*I.n[1]+dz*I.n[2]);if(dd<5&&dd>.4&&sf>0){const sp=(2.5+(5-dd)*1.6)*dt,k=Math.min(sp,dd)/dd;p.x+=dx*k;p.z+=dz*k;if(!I.vert||I.n[1]<0||dd<3)p.y+=dy*k;p.vy=Math.min(p.vy,0)*.2;if(Math.random()<.3)burst(p.x,p.y+1,p.z,I.col,1,.6,.4,.4)}}
  let hit=false;for(const y of[p.y+.1,p.y+.9,p.y+1.7]){const q=[p.x-I.c[0],y-I.c[1],p.z-I.c[2]],s=q[0]*I.n[0]+q[1]*I.n[1]+q[2]*I.n[2];if(s<-.25||s>.6)continue;const a=(q[0]*I.r[0]+q[1]*I.r[1]+q[2]*I.r[2])/(I.sx/2),b=(q[0]*I.u[0]+q[1]*I.u[1]+q[2]*I.u[2])/(I.sy/2);if(a*a+b*b>1)continue;hit=true;break}
  if(!hit)return;
  const ang=Math.random()*6.28;let dist=250+Math.random()*700,bx=p.x,bz=p.z;
@@ -1980,6 +1988,7 @@ async function initRoom(){const tok=(initRoom.tok=(initRoom.tok||0)+1);if(!windo
  room.on('boss',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED)return;bossHp=+d.hp||0;bossMax=+d.mx||MT.dragon.hp});
  room.on('bell',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||![d.x,d.y,d.z].every(Number.isFinite))return;snd('bell',d.x,d.y,d.z)});room.on('blkb',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||!Array.isArray(d.e))return;const e=d.e;for(let i=0;i+4<e.length;i+=5){const x=e[i],y=e[i+1],z=e[i+2],v=e[i+3];if((e[i+4]||0)!==dim||!okI(x,y,z,v)||v<0||v>=NB)continue;setBlock(x,y,z,v,{remote:true})}});room.on('blk',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||(d.dm||0)!==dim||!okI(d.x,d.y,d.z,d.v)||d.v<0||d.v>=NB)return;setBlock(d.x,d.y,d.z,d.v,{remote:true})});
  room.on('nuke',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||d.dm!==dim||![d.x,d.y,d.z,d.R].every(Number.isFinite))return;if(d.id){if(boomSeen.has(d.id))return;boomSeen.add(d.id)}startNuke(d.x,d.y,d.z,clamp(d.R,6,120))});
+ room.on('pexit',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||d.dm!==dim||!Array.isArray(d.c)||!Array.isArray(d.n)||d.c.length!==3||d.n.length!==3||![...d.c,...d.n].every(Number.isFinite))return;if(exitP.length>6)return;spawnExit(d.c,d.n,false)});
  room.on('portalx',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||d.dm!==dim)return;portalClose(false)});
  room.on('portal',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||d.dm!==dim||!Array.isArray(d.c)||!Array.isArray(d.n)||![...d.c,...d.n].every(Number.isFinite))return;placePortal(d.c,d.n);snd('pz',d.c[0],d.c[1],d.c[2])});
  room.on('gun',m=>{if(m.sameTab)return;const d=m.data||{};if(d.s!==SEED||d.dm!==dim||![d.sx,d.sy,d.sz,d.ex,d.ey,d.ez].every(Number.isFinite))return;tracer(d.sx,d.sy,d.sz,d.ex,d.ey,d.ez);const G=GUN[d.k];if(G)snd(G.snd,d.sx,d.sy,d.sz)});
