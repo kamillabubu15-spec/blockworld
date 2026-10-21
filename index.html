@@ -105,7 +105,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);font-w
   </div>
   <div id="menu" class="ovl menu"><div class="mwrap">
     <div class="logo">BLOCKWORLD<span>3D</span></div><div class="splash" id="splash"></div>
-    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 162</div>
+    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 163</div>
     <div id="prof" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px"><label>Nick: <input id="mNick" type="text" maxlength="16" style="width:140px;font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></label><label>Skin: <select id="mSkin" style="font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></select></label></div>
     <button class="btn" id="bPlay">Graj</button>
     <div class="row2"><button class="btn sm" id="bSet">Ustawienia (N)</button><button class="btn sm" id="bNew">Nowy świat</button></div>
@@ -2435,7 +2435,8 @@ function updateInfo(dt){fpsN++;fpsT+=dt;if(fpsT<.4)return;fps=fpsN/fpsT;fpsN=0;f
 function resize(){const g=$('game'),w=g.clientWidth,h=g.clientHeight;renderer.setSize(w,h,false);camera.aspect=handCam.aspect=w/h;camera.updateProjectionMatrix();handCam.updateProjectionMatrix()}
 new ResizeObserver(resize).observe($('game'));
 let last=performance.now(),spawnT=0,netMobT=0;
-function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;
+function frame(now){requestAnimationFrame(frame);try{frame2(now)}catch(e){console.error('frame',e);window.__fe=(window.__fe||0)+1}}
+function frame2(now){const dt=Math.min((now-last)/1000,.05);last=now;
  chunkWork();
  const paused=(ui==='menu'||ui==='set')&&!remotes.size;
  if(!paused){if(!dead)updatePlayer(dt);if(placed){if(isHost()){if((spawnT-=dt)<0){spawnT=1;spawnTick()}updateMobs(dt);if((netMobT-=dt)<0){netMobT=.15;broadcastMobs()}if(ghosts.size)clearGhosts()}else updateGhosts(dt)}updateEnts(dt);updateSand(dt);updateWater(dt);updateFire(dt);updateAmbient(dt);updateMining(dt)}
@@ -2452,8 +2453,8 @@ function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;
  swingT=Math.min(1,swingT+dt*4);if(swingT===0)swingCount++;const s=Math.sin(Math.min(swingT,1)*Math.PI);
  hand.position.set(.55-s*.15,-.52+Math.abs(bob)*.04-s*.08,-.85-s*.15);hand.rotation.set(-s*1.1,s*.3,0);
  updateInfo(dt);
- SHU.t.value=performance.now()/1000;renderer.clear();renderer.render(scene,camera);renderer.clearDepth();if(!dead&&ui!=='inv'&&camMode===0)renderer.render(handScene,handCam);
- requestAnimationFrame(frame)}
+ SHU.t.value=performance.now()/1000;renderer.clear();renderer.render(scene,camera);renderer.clearDepth();if(!dead&&ui!=='inv'&&camMode===0)renderer.render(handScene,handCam)}
+cv.addEventListener('webglcontextlost',e=>{e.preventDefault();$('loadmsg').textContent='Odświeżam grafikę…'});cv.addEventListener('webglcontextrestored',()=>{$('loadmsg').textContent='';try{resize()}catch(e){}});
 
 // ---------- start
 const SPL=['Teraz z multiplayerem!','Uwaga na creepery!','100% klocków!','Kop głębiej!','Spróbuj TNT!','Nieskończony świat!','Zrobione w Polsce!'];
