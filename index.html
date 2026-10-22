@@ -101,7 +101,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);font-w
   </div>
   <div id="menu" class="ovl menu"><div class="mwrap">
     <div class="logo">BLOCKWORLD<span>3D</span></div><div class="splash" id="splash"></div>
-    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 164</div>
+    <div id="loadmsg"></div><div style="font-size:12px;color:#9c9;margin-top:-4px">wersja 165</div>
     <div id="prof" style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px"><label>Nick: <input id="mNick" type="text" maxlength="16" style="width:140px;font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></label><label>Skin: <select id="mSkin" style="font:inherit;background:#222;color:#fff;border:1px solid #888;padding:4px 6px"></select></label></div>
     <button class="btn" id="bPlay">Graj</button>
     <div class="row2"><button class="btn sm" id="bSet">Ustawienia (N)</button><button class="btn sm" id="bNew">Nowy świat</button></div>
@@ -2174,7 +2174,7 @@ function sendSync(to){const e=[];for(const[k,m]of edits){const cx=Math.floor(k/6
 function addChat(t,col){const d=document.createElement('div');d.textContent=t;if(col)d.style.color=col;$('chat').insertBefore(d,$('chatIn'));setTimeout(()=>{if(ui!=='chat')d.remove()},12000);const all=$('chat').querySelectorAll('div');if(all.length>10)all[0].remove()}
 const nickOf=peer=>{const q=peersAll.find(x=>x.peer===peer);return sStr(q?.presence?.n)||'Gracz'};
 function renderMP(){const others=peersAll.filter(q=>!q.sameTab&&q.kind==='viewer').slice();const same=others.filter(q=>q.presence?.s===SEED);for(const[k,v]of ppMap)if(!peersAll.some(q=>q.peer===k)&&Date.now()-v.t<2500&&k!==myPeer){others.push({peer:k,presence:v.pr});if(v.pr.s===SEED)same.push(k)}
- $('mp').textContent=room?(room.connected()?`● Online · ${same.length+1} w tym świecie`+(others.length>same.length?` · ${others.length-same.length} w innym świecie`:''):'○ Łączenie…'):'Multiplayer: offline (gra solo)';
+ $('mp').textContent=room?(room.connected()?`● Online · ${same.length+1} w tym świecie`+(others.length>same.length?` · ${others.length-same.length} w innym świecie`:''):'○ Łączenie… (gra solo działa)'):'Multiplayer: offline (gra solo)';
  const box=$('mpbox');box.textContent='';if(!room){box.textContent='Brak multiplayera – '+(window.claude?(window.__re||'serwer Claude jeszcze nie odpowiada, próbuję ponownie…'):'zaloguj się na claude.ai i otwórz link w osobnej karcie (nie w podglądzie obok czatu)')+'. Bez multiplayera nie zobaczycie się nawet w tym samym świecie.';return}
  const h=document.createElement('div');h.textContent=`Graczy online: ${others.length+1} · Twój nick: ${set.nick} · Ziarno: ${SEED}`;box.append(h);if(window.__pe||window.__re){const e=document.createElement('div');e.style.color='#f66';e.textContent='Błąd: '+(window.__pe||'')+' '+(window.__re||'');box.append(e)}
  for(const q of others){const r=document.createElement('div');r.style.cssText='display:flex;gap:8px;justify-content:center;align-items:center;margin-top:4px';const n=document.createElement('span');n.textContent=sStr(q.presence?.n)||'Gracz';r.append(n);
@@ -2683,6 +2683,7 @@ const SPL=['Teraz z multiplayerem!','Uwaga na creepery!','100% klocków!','Kop g
 $('splash').textContent=SPL[Math.random()*SPL.length|0];
 const sv=LS.get('bw3d:save');loadWorld(sv?sv.seed:4242,true);
 applySet();renderHot();renderBars();setUI('menu');requestAnimationFrame(frame);initRoom();
+let __stuck=0,__retry=0;setInterval(()=>{try{if(room&&!window.__p2pOn&&room.connected&&!room.connected()){if(++__stuck>=4&&__retry<6){__stuck=0;__retry++;try{room.close&&room.close()}catch(e){}room=null;renderMP();initRoom()}}else __stuck=0}catch(e){}},5000);
 </script>
 
 </body></html>
